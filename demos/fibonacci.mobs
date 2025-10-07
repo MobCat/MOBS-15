@@ -1,0 +1,10 @@
+noop ~ fibonacci.mobs - Using S as scratch space
+init M 00000000    ~ a = 0
+init O 00000001    ~ b = 1
+init B 00000009    ~ Counter (9 iterations)
+move O to S        ~ Save b to S
+adds O M           ~ O = a + b
+peek S to M        ~ M = old b (non-destructive!)
+subs B 00000001    ~ Decrement
+ifnz B jump 00000005 ~ Loop back
+bell ~ O = 10th Fibonacci (55 = 0x37)

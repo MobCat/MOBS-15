@@ -1,0 +1,10 @@
+noop ~ divide.mobs - Divide 20 ÷ 4 = 5
+init M 00000014    ~ Dividend (20)
+init O 00000004    ~ Divisor (4)
+init B 00000000    ~ Quotient
+subs M O           ~ Subtract divisor from dividend (line 4)
+adds B 00000001    ~ Increment quotient
+ifgt M O jump 00000008 ~ If M > O, wrap to line 4
+iflt M O jump 00000002 ~ If M < O, skip next line
+adds B 00000001    ~ Add 1 more if M == O
+bell ~ B now contains 00000005 (5)

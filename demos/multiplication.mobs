@@ -1,0 +1,14 @@
+noop ~ multiply.mobs - Multiply 3 × 4 and display result
+init M 00000003    ~ Multiplicand (3)
+init O 00000004    ~ Multiplier (4)
+init B 00000000    ~ Result accumulator
+adds B M           ~ Add M to result
+subs O 00000001    ~ Decrement counter
+ifnz O jump 0000000B ~ If counter ≠ 0, jump back 3 lines
+init S 526573756C  ~ "Resu"
+adds S 743A2000    ~ "lt: "
+init M 30303030    ~ "0000"
+adds S M           ~ Display "0000"
+init M 30303043    ~ "000C" (12 in hex as ASCII)
+adds S M           ~ Display "000C"
+bell ~ Result: 0000000C displayed

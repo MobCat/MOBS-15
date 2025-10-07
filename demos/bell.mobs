@@ -1,0 +1,5 @@
+bell              ~ System ding
+init M 000003E8   
+bell M            ~ 1200Hz for 1 second
+init M 00000BB8
+bell M            ~ 1400Hz for 1 second
