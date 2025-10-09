@@ -1,5 +1,6 @@
 # MOBS-16
 **MobCat's Own Basic System**<br>
+**MobCat's Own Tar Pit**<br>
 Where buffer overflows and monkeys with calculators are features, not bugs.
 
 ## Philosophy
@@ -697,8 +698,8 @@ This means:
 
 **Basic termination:**
 ```
-init S 48656C6C6F    ~ "Hello"
-eomf                 ~ Program ends, M/O/B reset to 00000000, S shows "Hello"
+init S 48656C6C    ~ "Hell"
+eomf               ~ Program ends, M/O/B reset to 00000000, S shows "Hell"
 ```
 
 **Conditional exit (via conditional execution):**
@@ -832,20 +833,10 @@ Since M, O, B can only hold values up to FFFFFFFF, you must chain jumps to reach
 
 **Simple version:**
 ```
-init S 68656C6C6F    ~ "hello"
-adds S 20776F726C    ~ " worl"
-adds S 6421          ~ "d!"
-eomf                 ~ Now "hello world!" is in the S register, we can exit.
-```
-
-**Character by character:**
-```
-init S 68    ~ "h"
-adds S 65    ~ "e"
-adds S 6C    ~ "l"
-adds S 6C    ~ "l"
-adds S 6F    ~ "o"
-eomf
+init S 68656C6C    ~ "hell"
+adds S 6F20776F    ~ "o wo"
+adds S 726C6421    ~ "rld!"
+eomf               ~ Now "hello world!" is in the S register, we can exit.
 ```
 
 ### Counter (0 to 9)
@@ -855,64 +846,64 @@ init M 00000000    ~ Counter starts at 0
 dupe M to O
 move O to S        ~ Display current count
 adds M 00000001    ~ Increment
-iflt M 0000000A jump FFFFFFFD    ~ Loop back 3 lines if M < 10
+iflt M 0000000A jump 4 ~ Loop back 3 lines if M < 10
 eomf               ~ Stop when counter reaches 10
 ```
 
 ### Multiplication (3 × 4 = 12)
 
 ```
-init M 00000003    ~ Multiplicand (3)
-init O 00000004    ~ Multiplier (4)
-init B 00000000    ~ Result accumulator
-adds B M           ~ Add M to result
-subs O 00000001    ~ Decrement counter
-ifnz O jump FFFFFFFE    ~ Loop back 2 lines if O != 0
-move B to S        ~ Display result (12)
+init M 00000003      ~ Multiplicand (3)
+init O 00000004      ~ Multiplier (4)
+init B 00000000      ~ Result accumulator
+adds B M             ~ Add M to result
+subs O 00000001      ~ Decrement counter
+ifnz O jump 00000006 ~ Loop back 2 lines if O != 0
+move B to S          ~ Display result (12)
 eomf
 ```
 
 ### Division (20 ÷ 4 = 5)
 
 ```
-init M 00000014    ~ Dividend (20)
-init O 00000004    ~ Divisor (4)
-init B 00000000    ~ Quotient
-subs M O           ~ Subtract divisor from dividend
-adds B 00000001    ~ Increment quotient
-ifgt M O jump FFFFFFFE    ~ Loop back 2 lines if M > O
-iflt M O jump 00000001    ~ Skip next line if M < O
-adds B 00000001    ~ Add 1 more if M == O
-move B to S        ~ Display result (5)
+init M 00000014        ~ Dividend (20)
+init O 00000004        ~ Divisor (4)
+init B 00000000        ~ Quotient
+subs M O               ~ Subtract divisor from dividend
+adds B 00000001        ~ Increment quotient
+ifgt M O jump 00000008 ~ Loop back 2 lines if M > O
+iflt M O jump 00000001 ~ Skip next line if M < O
+adds B 00000001        ~ Add 1 more if M == O
+move B to S            ~ Display result (5)
 eomf
 ```
 
 ### Fibonacci Sequence (first 10 numbers)
 
 ```
-init M 00000000    ~ F(0) = 0
-init O 00000001    ~ F(1) = 1
-init B 0000000A    ~ Counter (10 iterations)
-move M to S        ~ Output F(0)
-move O to S        ~ Output F(1)
-peek M to M        ~ Save M (non-destructive prep)
-adds M O           ~ M = M + O
-move M to S        ~ Output next Fibonacci
-dupe O to M        ~ Swap values
-dupe M to O        ~ Complete the swap
-subs B 00000001    ~ Decrement counter
-ifnz B jump FFFFFFF9    ~ Loop back 7 lines if counter != 0
+init M 00000000       ~ F(0) = 0
+init O 00000001       ~ F(1) = 1
+init B 0000000A       ~ Counter (10 iterations)
+move M to S           ~ Output F(0)
+move O to S           ~ Output F(1)
+peek M to M           ~ Save M (non-destructive prep)
+adds M O              ~ M = M + O
+move M to S           ~ Output next Fibonacci
+dupe O to M           ~ Swap values
+dupe M to O           ~ Complete the swap
+subs B 00000001       ~ Decrement counter
+ifnz B jump 000000005 ~ Loop back 7 lines if counter != 0
 eomf
 ```
 
 ### Infinite Counter (no eomf)
 
 ```
-init M 00000000    ~ Counter
-adds M 00000001    ~ Increment
+init M 00000000 ~ Counter
+adds M 00000001 ~ Increment
 dupe M to O
-move O to S        ~ Display current count
-~ No eomf - program wraps to beginning and continues forever!
+move O to S     ~ Display current count
+noop            ~ No eomf - program wraps to beginning and continues forever!
 ```
 
 ### Conditional String Output
@@ -937,10 +928,10 @@ eomf                                 ~ Both conditions can't be true
 ### Random Number Generator with Bell
 
 ```
-rand M             ~ Get random number (or just use uninitialized M!)
-bell M             ~ Ring bell with random tone
-jump 00000000      ~ Loop back 1 line (or remove for auto-loop)
-~ Without eomf, generates infinite random bell tones!
+rand M         ~ Get random number (or just use uninitialized M!)
+bell M         ~ Ring bell with random tone
+jump 00000001  ~ Loop back 1 line (or remove for auto-loop)
+noop           ~ Without eomf, generates infinite random bell tones!
 ```
 
 **Using boot garbage:**
@@ -961,8 +952,8 @@ eomf               ~ Clean up for next run - now M, O, B = 00000000
 init M CAFEBABE
 init O DEADBEEF
 init B 12345678
-~ No eomf - runs forever until externally terminated
-~ When killed, M, O, B stay dirty (no cleanup happened)
+noop            ~ No eomf - runs forever until externally terminated
+noop            ~ When killed, M, O, B stay dirty (no cleanup happened)
 
 ~ Program 2 (run immediately after): Gets free random numbers!
 peek M to S    ~ Gets CAFEBABE (if Program 1 was killed before changing M)
@@ -992,7 +983,7 @@ dupe M to B        ~ Copy M to B
 subs B O           ~ B = M - O
 ifyz B jump 00000004    ~ If divisible, not prime
 adds O 00000001    ~ Next divisor
-iflt O M jump FFFFFFFB    ~ Keep testing if O < M
+iflt O M jump 00000008    ~ Keep testing if O < M
 init S 7072696D65    ~ "prime"
 eomf
 init S 6E6F7421      ~ "not!"
@@ -1008,7 +999,7 @@ subs B O           ~ B = M - O
 ifyz B init S 6E6F7421    ~ If divisible, S = "not!" and continue
 ifyz B eomf               ~ Exit if not prime
 adds O 00000001           ~ Next divisor
-iflt O M jump FFFFFFFB    ~ Keep testing
+iflt O M jump 00000008    ~ Keep testing
 init S 7072696D65         ~ "prime"
 eomf
 ```
@@ -1020,7 +1011,7 @@ init S 4F4E    ~ "ON"
 bell           ~ Beep
 init S         ~ Clear S
 bell           ~ Beep again
-~ No eomf - loops forever creating blinking effect!
+noop           ~ No eomf - loops forever creating blinking effect!
 ```
 
 ## Implementation Notes
@@ -1034,11 +1025,13 @@ A MOBS-16 interpreter must:
 4. Parse 16 opcodes
 5. Handle hex arithmetic with wrapping
 6. Implement circular execution (wrap to start at EOF unless `eomf` encountered)
-7. Support comments (~) attached to code lines
+7. Support comments (~) only attached to code lines
 8. Implement hardware-specific S register behavior
 9. On `eomf`: reset M, O, B to 00000000, reset all cursors to 0, leave S intact, terminate cleanly
    
 ### Memory Management
+
+More memory usage, we don't manage anything, and should be able to use any trash left for us as valid hex data.
 
 - M, O, B: Fixed 8 nibbles (4 bytes) each
 - S: Dynamic, grows as needed, minimum 12 bytes (24 nibbles) to fit all base registers into S at once.
@@ -1071,8 +1064,9 @@ The only errors are **syntax errors** (malformed opcodes, floating comments, inv
 > [!IMPORTANT]
 > MOBS-16 does not specify execution speed.<br>
 > A timing loop that works on one system may be completely different on another.<br>
-> You can go as fast or as slow as you want. You are still processing the program one line at a time.<br>
-> How many lines you can churn though in a sec, or a millisecond is totally up to you. Lines per day, lines per full moon. Its all relative.
+> You can go as fast or as slow as you want. You are still processing the program one line at a time (including noops).<br>
+> How many lines you can churn though in a sec, or a millisecond is totally up to you. Lines per day, lines per full moon. Its all relative.<br>
+> Anything can be your clock, all it has to do is advance the program counter once per n. If you want to use the half-life of Cesium-137. go for it.
 
 Hardware determines:
 - How fast the program counter advances
