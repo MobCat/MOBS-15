@@ -572,11 +572,12 @@ noop
 noop ~ Does nothing
 noop ~ Still does nothing
 noop ~ Yep, you guessed it. Still does nothing
+noop ~ However this program takes 4 "ticks" of your clock to run, even know it does nothing.
 ```
 
 ### 14. `rand` - Random Number Generation
 
-Fills a register with random nibbles from uninitialized memory.
+Fills a register with random nibbles from uninitialized memory. 4 bytes at a time.
 
 **Syntax:**
 ```
@@ -586,7 +587,8 @@ rand <register>
 **Behavior:**
 - Fills register with random/garbage data
 - Pulls from uninitialized memory (implementation dependent)
-- Resets cursor to 0
+- Appears Resets cursor to 0, However on M, O and B your have just overflowed back to the start.
+- S registor cursor is now 8 nubbles over.
 - **Destructive** - overwrites register
 - Results are unpredictable and may vary between runs
 
@@ -595,7 +597,7 @@ rand <register>
 rand M             ~ M = 5EA9029A (why? who knows?)
 rand O             ~ O = B7F3D581 (different garbage)
 rand B             ~ B = D8A90E76 (where is this data even coming from?)
-rand S             ~ S filled with random data, 4 bytes at a time
+rand S             ~ S = 8BA93E51???????????????? (The rest of S is still uninsilized)
 ```
 
 > [!NOTE]  
@@ -603,25 +605,16 @@ rand S             ~ S filled with random data, 4 bytes at a time
 > You can use this as free randomness without calling `rand` at all. Just don't `init` them first.
 
 > [!WARNING]  
-> If you use `rand S`, we will keep filling the selected register until the hardware says stop!<br>
-> If hardware never tells us to stop, we never stop!<br>
+> ```
+> rand S
+> ```
+> This simple one line program will keep filling the S register until the hardware says stop!<br>
+> as you never said `eomf`
+> If the hardware never tells us to stop, we never stop!<br>
 > If your S register is 9 miles of tape, we will fill it, 4 bytes at a time. Until you run out of tape, or the heat death of the universe.<br>
 > Whichever comes first.
 
-> [!WARNING]  
-> Depending on implementation, `rand` may pull and use sensitive data from your system.<br>
-> `rand` does not care about your data, it just wants data.<br>
-> Same applies to uninitialized M, O, B on boot! We may end up reading left over garbage from other programs on boot.<br>
-> And that could be anything, we don't know, we didn't put it there, but we'll use it anyways, sure why not.
-
 Garbage collection? Safe memory initialization? Nah, ima just use it as is, nom nom nom. It's just hex data after all.
-
-**Safer S randomization:**<br>
-If you just want one random value in S, put it in M, O or B first, then move it to S.
-```
-rand M
-move M to S        ~ Controlled 4-byte random chunk
-```
 
 ### 15. `bell` - Bell/Speaker Output
 
@@ -1028,13 +1021,17 @@ A MOBS-16 interpreter must:
 7. Support comments (~) only attached to code lines
 8. Implement hardware-specific S register behavior
 9. On `eomf`: reset M, O, B to 00000000, reset all cursors to 0, leave S intact, terminate cleanly
+
+MOB-16 op codes are very unpredictable whether they will or will not reset the cursor.<br>
+There is no rhyme or reason, just whatever I felt like at the time of making the op code.<br>
+So you as the system need to keep track of the cursor, if not your op codes are going to act even more strangely then they already do.
    
 ### Memory Management
 
 More memory usage, we don't manage anything, and should be able to use any trash left for us as valid hex data.
 
 - M, O, B: Fixed 8 nibbles (4 bytes) each
-- S: Dynamic, grows as needed, minimum 12 bytes (24 nibbles) to fit all base registers into S at once.
+- S: Dynamic, grows as needed, minimum 24 nibbles (12 bytes) to fit all base registers into S at once.
 - Cursors: Separate position tracking for each register. But you only have to count up for this one. Remember we can overflow around to the start.
 - Program counter: Same as above but we count down the page in one counter. Remember we can overflow back to the top.
 
@@ -1042,7 +1039,7 @@ More memory usage, we don't manage anything, and should be able to use any trash
 
 lol no.<br>
 
-MOBS-16 embraces chaos. There are no runtime errors:
+MOBS-16 embraces chaos. There are no runtime errors, only syntax error:
 - Overflow/underflow wraps
 - Invalid jumps wrap
 - Out-of-bounds wraps
@@ -1050,6 +1047,10 @@ MOBS-16 embraces chaos. There are no runtime errors:
 - Programs without `eomf` loop infinitely (intentional!)
 
 The only errors are **syntax errors** (malformed opcodes, floating comments, invalid register names).
+
+And even then, the system will still do its darndest to execute whatever you gave it, valid or not.
+
+Try and put things in an X registor? Well MOBS-16 will put that data in a registor somewhere, but who knows where as X does not excist.
 
 ### Performance Considerations
 
@@ -1064,9 +1065,9 @@ The only errors are **syntax errors** (malformed opcodes, floating comments, inv
 > [!IMPORTANT]
 > MOBS-16 does not specify execution speed.<br>
 > A timing loop that works on one system may be completely different on another.<br>
-> You can go as fast or as slow as you want. You are still processing the program one line at a time (including noops).<br>
+> You can go as fast or as slow as you want. You are still processing the program one line at a time (including `noop`s).<br>
 > How many lines you can churn though in a sec, or a millisecond is totally up to you. Lines per day, lines per full moon. Its all relative.<br>
-> Anything can be your clock, all it has to do is advance the program counter once per n. If you want to use the half-life of Cesium-137. go for it.
+> Anything can be your clock, all it has to do is advance the program counter once per n. If you want to use the half-life of Cesium-137. Go for it.
 
 Hardware determines:
 - How fast the program counter advances
