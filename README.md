@@ -1,6 +1,6 @@
 # MOBS-16
 **MobCat's Own Basic System**<br>
-**MobCat's Own Tar Pit**<br>
+**MobCat's Own Esolang Tar Pit**<br>
 Where buffer overflows and monkeys with calculators are features, not bugs.
 
 ## Philosophy
