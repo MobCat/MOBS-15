@@ -7,15 +7,33 @@ Where buffer overflows and monkeys with calculators are features, not bugs.
 
 MOBS-16 is a destructive, assembly-inspired esoteric programming language where buffer overflows and underflows are features, not bugs.<br>
 Every operation has the potential to destroy your data (yes, even the simple random number generator).<br>
-The language embraces chaos, undefined behavior, and forces programmers to think carefully about there state.
+The language embraces chaos, undefined behavior, and forces programmers to think carefully about there state and where they are in the program.<br>
+MOBS-16 leaves as many choices like memory safety and what line of program are we up to in the hands of the programmer, the system is designed to have effectively no guard rails.<br>
+We lay down some rules and concepts for you, how you use or abuse them is up to you.
 
 **Core Principles:**
 - **Destructive by default** - Most operations modify or destroy source data in some way
-- **Overflow/underflow is intentional** - Wrapping arithmetic and navigation is how you move backward
+- **Overflow/underflow is intentional** - Wrapping arithmetic is how you navigate. Moveing backward in code as in jump to line n+2 is a side effect that you can abuse
+- **Overflow/underflow is intentional** - Can't have a buffer overflow or underflow bug if the buffer is designed to do that from the start.
 - **Circular execution** - Programs loop indefinitely until explicitly terminated with `eomf`
-- **No multiplication or division** - You must implement these with addition/subtraction loops
-- **Hardware-agnostic output** - The S register adapts to whatever hardware you connect it to
-- **Nibble-level addressing** - All operations work on 4-bit nibbles (hex digits)
+- **No multiplication or division** - No shortcuts, you gotta do it the hard way with addition or subtraction
+- **Hardware-agnostic output** - The S register can be whatever hardware you can think of as long as it reads and wrights data.
+- **Nibble-level addressing** - All operations work on 4-bit nibbles (hex digits) but cursor can move 1 nibble at a time. nom nom nom data.
+- **Speed not set by spec** - No set speed like MHz or GHz. Each line is processed one at a time (even `noop`), how fast you do that is up to you.
+
+## Inspirations
+
+MOBS-16 was made just to prove to my self I could do something like this.<br>
+And if I can make my own language, then so can you. Go have fun with it. Explore unique ideas (like an S register thats only limited by real world space and time)
+
+
+References I riffed on.
+- Brainfuck - first esolang I herd about, inspired a lot of the obtuse behaviors of MOBS-16.
+- x86/x64 Assembly - I like the idea of raw hardware access and special op codes. But it's too complex for my liking.
+- Commodore 64 BASIC - Never really used it but did "borrow" its peak and poke ethos.
+- Speedcoding - same reasons as asm, rigid language with strict functions, but creative uses of those limited functions lets you make whatever you can think of.
+- I also just like how a lot of older and simpler languages have this nice layout where it all fits into a nice box (or on a punch card). Each line has a fixed set of chars.
+Hence why MOBS-16 doesn't let you put comments anywhere, each line of code has a fixed based amount of characters. so it all ligns up nicely.
 
 ## Architecture
 
